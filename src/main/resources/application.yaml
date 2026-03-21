@@ -1,3 +1,150 @@
 spring:
   application:
-    name: order-book
+    name: vibranium-orderbook
+  data:
+    mongodb:
+      auto-index-creation: false
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      connect-timeout: 2s
+      timeout: 1s
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
+          max-wait: 200ms
+        shutdown-timeout: 200ms
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 5
+      buffer-memory: 33554432
+      compression-type: snappy
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 30000
+        request.timeout.ms: 15000
+
+    consumer:
+      group-id: orderbook-consumers
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 500
+      fetch-min-size: 1
+      fetch-max-wait: 100ms
+      properties:
+        isolation.level: read_committed
+        spring.json.trusted.packages: "com.vibranium.orderbook.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.vibranium.orderbook.domain.event.DomainEvent
+
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+      concurrency: 3
+      poll-timeout: 3s
+      missing-topics-fatal: false
+
+    topics:
+      orders-placed: orders.placed
+      orders-matched: orders.matched
+      balance-updated: balance.updated
+      audit-log: audit.log
+      orders-placed-dlt: orders.placed.DLT
+      orders-matched-dlt: orders.matched.DLT
+  mongodb:
+    uri: mongodb://admin:admin@localhost:27017/appdb?authSource=admin
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      orderService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 2s
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+      kafkaPublisher:
+        sliding-window-size: 5
+        failure-rate-threshold: 60
+        wait-duration-in-open-state: 5s
+
+  ratelimiter:
+    instances:
+      orderService:
+        limit-for-period: 5000
+        limit-refresh-period: 1s
+        timeout-duration: 100ms
+  retry:
+    instances:
+      kafkaPublisher:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - org.apache.kafka.common.errors.RetriableException
+          - org.springframework.kafka.KafkaException
+  bulkhead:
+    instances:
+      orderService:
+        max-concurrent-calls: 200
+        max-wait-duration: 50ms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+    redis:
+      enabled: true
+    mongo:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    root: INFO
+    com.vibranium.orderbook: DEBUG
+    org.springframework.kafka: WARN
+    org.springframework.data.mongodb: WARN
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n"
+
+server:
+  port: 8081
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    connection-timeout: 5s
+
+spring.lifecycle:
+  timeout-per-shutdown-phase: 30s
