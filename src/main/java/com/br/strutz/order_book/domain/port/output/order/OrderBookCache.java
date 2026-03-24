@@ -1,4 +1,4 @@
-package com.br.strutz.order_book.domain.port.output;
+package com.br.strutz.order_book.domain.port.output.order;
 
 import com.br.strutz.order_book.application.query.OrderBookSnapshot;
 

@@ -27,9 +27,6 @@ import java.util.List;
 })
 public class WalletDocument {
 
-    @Version
-    private Long version;
-
     @Id
     private String id;
 
@@ -43,6 +40,7 @@ public class WalletDocument {
     private BigDecimal reservedBalance;
 
     @Field("transactions")
+    @Builder.Default
     private List<WalletTransactionEmbedded> transactions = new ArrayList<>();
 
     @Field("created_at")
@@ -51,13 +49,17 @@ public class WalletDocument {
     @Field("updated_at")
     private Instant updatedAt;
 
+    @Field("lock_touched_at")
+    private Instant lockTouchedAt;
+
+    @Version
+    private Long version;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class WalletTransactionEmbedded {
-
         private String type;
         private BigDecimal amount;
         private String description;

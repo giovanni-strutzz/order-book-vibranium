@@ -1,4 +1,4 @@
-package com.br.strutz.order_book.domain.port.output;
+package com.br.strutz.order_book.domain.port.output.event;
 
 import com.br.strutz.order_book.domain.event.Event;
 
