@@ -12,6 +12,9 @@ public class OrderResponse {
     @Schema(description = "ID da ordem gerada", example = "uuid-123")
     String orderId;
 
+    @Schema(description = "ID do usuário", example = "1")
+    String userId;
+
     @Schema(description = "Status da operação", example = "ACCEPTED")
     String status;
 

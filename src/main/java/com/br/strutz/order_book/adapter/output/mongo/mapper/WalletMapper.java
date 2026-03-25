@@ -5,6 +5,7 @@ import com.br.strutz.order_book.domain.model.Money;
 import com.br.strutz.order_book.domain.model.aggregates.Wallet;
 import com.br.strutz.order_book.domain.model.aggregates.WalletTransaction;
 import com.br.strutz.order_book.domain.model.user.UserId;
+import com.br.strutz.order_book.domain.model.wallet.WalletId;
 import com.br.strutz.order_book.domain.model.wallet.WalletTransactionType;
 import org.springframework.stereotype.Component;
 
@@ -14,20 +15,19 @@ import java.util.List;
 public class WalletMapper {
 
     public WalletDocument toDocument(Wallet wallet) {
-        List<WalletDocument.WalletTransactionEmbedded> txDocs = wallet.getTransactions().stream()
-                .map(tx -> WalletDocument.WalletTransactionEmbedded.builder()
-                        .type(tx.getTransactionType().name())
-                        .amount(tx.getAmount().getAmount())
-                        .description(tx.getDescription())
-                        .occurredAt(tx.getOcurredAt())
-                        .build())
-                .toList();
-
         return WalletDocument.builder()
-                .userId(wallet.getUserId().getValue())
+                .id(wallet.getUserId().getValue())     // _id = userId
+                .userId(wallet.getUserId().getValue()) // índice único
                 .availableBalance(wallet.getAvailableBalance().getAmount())
                 .reservedBalance(wallet.getReservedBalance().getAmount())
-                .transactions(txDocs)
+                .transactions(wallet.getTransactions().stream()
+                        .map(tx -> WalletDocument.WalletTransactionEmbedded.builder()
+                                .type(tx.getTransactionType().name())
+                                .amount(tx.getAmount().getAmount())
+                                .description(tx.getDescription())
+                                .occurredAt(tx.getOcurredAt())
+                                .build())
+                        .toList())
                 .createdAt(wallet.getCreatedAt())
                 .updatedAt(wallet.getUpdatedAt())
                 .build();
@@ -42,6 +42,7 @@ public class WalletMapper {
                 .toList();
 
         return Wallet.reconstitute(
+                WalletId.of(doc.getId()),
                 UserId.of(doc.getUserId()),
                 Money.of(doc.getAvailableBalance()),
                 Money.of(doc.getReservedBalance()),

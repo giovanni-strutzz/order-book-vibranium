@@ -21,11 +21,11 @@ import java.time.Instant;
 @Document(collection = "orders")
 @CompoundIndexes({
         @CompoundIndex(name = "idx_user_date",
-                def = "{'userId': 1, 'createdAt': -1}"),
+                def = "{'user_id': 1, 'created_at': -1}"),
         @CompoundIndex(name = "idx_status_type_price",
                 def = "{'status': 1, 'type': 1, 'price': 1}"),
         @CompoundIndex(name = "idx_correlation",
-                def = "{'correlationId': 1}", unique = true)
+                def = "{'correlation_id': 1}", unique = true)
 })
 public class OrderDocument {
 

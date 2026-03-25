@@ -32,7 +32,8 @@ public class WalletAdapter implements WalletRepository {
 
     @Override
     public Wallet save(Wallet wallet) {
-        WalletDocument saved = mongoRepository.save(mapper.toDocument(wallet));
+        WalletDocument document = mapper.toDocument(wallet);
+        WalletDocument saved   = mongoRepository.save(document);
         return mapper.toDomain(saved);
     }
 
@@ -40,23 +41,6 @@ public class WalletAdapter implements WalletRepository {
     public Optional<Wallet> findByUserId(UserId userId) {
         return mongoRepository.findByUserId(userId.getValue())
                 .map(mapper::toDomain);
-    }
-
-    @Override
-    public Optional<Wallet> findByUserIdWithLock(UserId userId) {
-        Query query = new Query(
-                Criteria.where("user_id").is(userId.getValue()));
-
-        Update update = new Update().currentDate("lock_touched_at");
-
-        FindAndModifyOptions options = FindAndModifyOptions.options()
-                .returnNew(false)
-                .upsert(false);
-
-        WalletDocument locked = mongoTemplate.findAndModify(
-                query, update, options, WalletDocument.class);
-
-        return Optional.ofNullable(locked).map(mapper::toDomain);
     }
 
     @Override

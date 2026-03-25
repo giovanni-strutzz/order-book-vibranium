@@ -73,7 +73,7 @@ public class PlaceOrderCommandHandler implements PlaceOrderUseCase {
 
         List<Trade> trades = orderBook.match(order);
 
-        orderRepository.save(order);
+//        orderRepository(order);
 
         if (!trades.isEmpty()) {
             walletService.settleTrades(trades);

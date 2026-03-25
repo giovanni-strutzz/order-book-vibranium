@@ -9,6 +9,7 @@ import com.br.strutz.order_book.application.command.CancelOrderResult;
 import com.br.strutz.order_book.application.command.PlaceOrderCommand;
 import com.br.strutz.order_book.application.command.PlaceOrderResult;
 import com.br.strutz.order_book.application.query.OrderBookSnapshot;
+import com.br.strutz.order_book.application.query.OrderSnapshot;
 import com.br.strutz.order_book.domain.model.Money;
 import com.br.strutz.order_book.domain.model.order.OrderId;
 import com.br.strutz.order_book.domain.model.order.OrderType;
@@ -84,5 +85,21 @@ public class OrderRestMapper {
                 .spread(snapshot.getSpread())
                 .generatedAt(snapshot.getGeneratedAt())
                 .build();
+    }
+
+    public OrderResponse toOrderResponse(OrderSnapshot snapshot) {
+        return OrderResponse.builder()
+                .orderId(snapshot.getOrderId())
+                .userId(snapshot.getUserId())
+                .status(snapshot.getStatus())
+                .message(buildMessage(snapshot))
+                .build();
+    }
+
+    private String buildMessage(OrderSnapshot snapshot) {
+        return String.format("Order %s from user %s registered with status %s",
+                snapshot.getOrderId(),
+                snapshot.getUserId(),
+                snapshot.getStatus());
     }
 }

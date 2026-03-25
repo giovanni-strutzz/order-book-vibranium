@@ -3,6 +3,7 @@ package com.br.strutz.order_book.domain.model.aggregates;
 import com.br.strutz.order_book.domain.exception.InsufficientFundsException;
 import com.br.strutz.order_book.domain.model.Money;
 import com.br.strutz.order_book.domain.model.user.UserId;
+import com.br.strutz.order_book.domain.model.wallet.WalletId;
 import com.br.strutz.order_book.domain.model.wallet.WalletTransactionType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,20 +16,21 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
-@EqualsAndHashCode(of = "userId")
+@EqualsAndHashCode(of = "id")
 @ToString
 public class Wallet {
 
+    private final WalletId id;
     private final UserId userId;
     private final Instant createdAt;
     private Money availableBalance;
     private Money reservedBalance;
     private Instant updatedAt;
 
-    // Histórico imutável de movimentações (Event Sourcing leve)
     private final List<WalletTransaction> transactions = new ArrayList<>();
 
-    private Wallet(UserId userId, Money initialBalance) {
+    private Wallet(WalletId id, UserId userId, Money initialBalance) {
+        this.id = Objects.requireNonNull(id);
         this.userId           = Objects.requireNonNull(userId);
         this.availableBalance = Objects.requireNonNull(initialBalance);
         this.reservedBalance  = Money.zero();
@@ -37,13 +39,17 @@ public class Wallet {
     }
 
     public static Wallet create(UserId userId, Money initialBalance) {
-        return new Wallet(userId, initialBalance);
+        return new Wallet(
+                WalletId.of(userId.getValue()), // id = userId
+                userId,
+                initialBalance
+        );
     }
 
-    public static Wallet reconstitute(UserId userId, Money available,
+    public static Wallet reconstitute(WalletId id, UserId userId, Money available,
                                       Money reserved, Instant createdAt,
                                       List<WalletTransaction> transactions) {
-        var wallet = new Wallet(userId, available);
+        var wallet = new Wallet(id, userId, available);
         wallet.reservedBalance = reserved;
         wallet.updatedAt       = Instant.now();
         wallet.transactions.addAll(transactions);

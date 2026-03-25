@@ -5,6 +5,7 @@ import com.br.strutz.order_book.domain.model.aggregates.Order;
 import com.br.strutz.order_book.domain.model.order.OrderId;
 import com.br.strutz.order_book.domain.model.order.OrderType;
 import com.br.strutz.order_book.domain.model.user.UserId;
+import org.apache.catalina.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -26,4 +27,6 @@ public interface OrderRepository {
     List<Order> findByUserIdOrderByCreatedAtDesc(UserId userId, int page, int size);
 
     boolean existsByCorrelationId(String correlationId);
+
+    long countByUserId(UserId userId);
 }

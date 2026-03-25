@@ -11,7 +11,5 @@ public interface WalletRepository {
 
     Optional<Wallet> findByUserId(UserId userId);
 
-    Optional<Wallet> findByUserIdWithLock(UserId userId);
-
     boolean existsByUserId(UserId userId);
 }

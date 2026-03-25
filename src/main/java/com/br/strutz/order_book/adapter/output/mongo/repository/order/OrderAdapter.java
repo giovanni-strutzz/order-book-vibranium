@@ -89,4 +89,10 @@ public class OrderAdapter implements OrderRepository {
     public boolean existsByCorrelationId(String correlationId) {
         return mongoRepository.existsByCorrelationId(correlationId);
     }
+
+    @Override
+    public long countByUserId(UserId userId) {
+        Query query = new Query(Criteria.where("userId").is(userId.getValue()));
+        return mongoTemplate.count(query, OrderDocument.class);
+    }
 }
