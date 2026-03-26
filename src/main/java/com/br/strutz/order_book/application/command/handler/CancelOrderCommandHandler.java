@@ -71,7 +71,7 @@ public class CancelOrderCommandHandler implements CancelOrderUseCase {
                 order.getPrice(),
                 order.remainingQuantity());
 
-        // 7. Invalida cache e publica evento
+        
         orderBookCache.invalidate();
         eventPublisher.publish(new OrderCancelledEvent(order));
 

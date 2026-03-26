@@ -47,7 +47,7 @@ public class WalletAdapter implements WalletRepository {
                 existing != null ? existing.getId() : "NULL");
 
         if (existing != null) {
-            // Usa replace direto pelo _id — ignora o @Version
+            
             WalletDocument toReplace = WalletDocument.builder()
                     .id(existing.getId())
                     .userId(existing.getUserId())

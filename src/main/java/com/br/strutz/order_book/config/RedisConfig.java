@@ -1,4 +1,4 @@
-// config/RedisConfig.java
+
 package com.br.strutz.order_book.config;
 
 import com.br.strutz.order_book.application.query.OrderBookSnapshot;

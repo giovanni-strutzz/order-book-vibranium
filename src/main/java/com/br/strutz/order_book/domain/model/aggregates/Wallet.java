@@ -38,12 +38,12 @@ public class Wallet {
         this.updatedAt        = this.createdAt;
     }
 
-    // Factory method — gera um novo WalletId independente do UserId
+    
     public static Wallet create(UserId userId, Money initialBalance) {
         return new Wallet(WalletId.generate(), userId, initialBalance);
     }
 
-    // Reconstitui a partir da persistência — preserva o id original
+    
     public static Wallet reconstitute(WalletId id,
                                       UserId userId,
                                       Money available,
