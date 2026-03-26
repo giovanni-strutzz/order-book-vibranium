@@ -15,19 +15,21 @@ import java.util.List;
 public class WalletMapper {
 
     public WalletDocument toDocument(Wallet wallet) {
+        List<WalletDocument.WalletTransactionEmbedded> txDocs = wallet.getTransactions().stream()
+                .map(tx -> WalletDocument.WalletTransactionEmbedded.builder()
+                        .type(tx.getTransactionType().name())
+                        .amount(tx.getAmount().getAmount())
+                        .description(tx.getDescription())
+                        .occurredAt(tx.getOcurredAt())
+                        .build())
+                .toList();
+
         return WalletDocument.builder()
-                .id(wallet.getUserId().getValue())     // _id = userId
-                .userId(wallet.getUserId().getValue()) // índice único
+                .id(wallet.getId().getValue())       // WalletId → String
+                .userId(wallet.getUserId().getValue())
                 .availableBalance(wallet.getAvailableBalance().getAmount())
                 .reservedBalance(wallet.getReservedBalance().getAmount())
-                .transactions(wallet.getTransactions().stream()
-                        .map(tx -> WalletDocument.WalletTransactionEmbedded.builder()
-                                .type(tx.getTransactionType().name())
-                                .amount(tx.getAmount().getAmount())
-                                .description(tx.getDescription())
-                                .occurredAt(tx.getOcurredAt())
-                                .build())
-                        .toList())
+                .transactions(txDocs)
                 .createdAt(wallet.getCreatedAt())
                 .updatedAt(wallet.getUpdatedAt())
                 .build();
@@ -42,7 +44,7 @@ public class WalletMapper {
                 .toList();
 
         return Wallet.reconstitute(
-                WalletId.of(doc.getId()),
+                WalletId.of(doc.getId()),            // String → WalletId
                 UserId.of(doc.getUserId()),
                 Money.of(doc.getAvailableBalance()),
                 Money.of(doc.getReservedBalance()),

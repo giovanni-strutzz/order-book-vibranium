@@ -1,15 +1,17 @@
 package com.br.strutz.order_book.domain.model.wallet;
 
+import lombok.Value;
 import org.springframework.util.Assert;
 
 import java.util.UUID;
 
+@Value
 public class WalletId {
 
     String value;
 
     private WalletId(String value) {
-        Assert.hasText(value, "WalletId cannot be null");
+        Assert.hasText(value, "WalletId cannot be empty");
         this.value = value;
     }
 

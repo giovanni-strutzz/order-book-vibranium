@@ -92,7 +92,7 @@ public class PlaceOrderCommandHandler implements PlaceOrderUseCase {
         log.info("Order placed — orderId={} trades={}",
                 order.getId(), trades.size());
 
-        return PlaceOrderResult.success(order.getId());
+        return PlaceOrderResult.success(order.getId(), order.getUserId());
     }
 
     private void reserveBalance(PlaceOrderCommand command) {

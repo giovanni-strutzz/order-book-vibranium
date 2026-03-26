@@ -21,16 +21,16 @@ import java.util.Objects;
 public class Wallet {
 
     private final WalletId id;
-    private final UserId userId;
-    private final Instant createdAt;
-    private Money availableBalance;
-    private Money reservedBalance;
-    private Instant updatedAt;
+    private final UserId   userId;
+    private final Instant  createdAt;
+    private       Money    availableBalance;
+    private       Money    reservedBalance;
+    private       Instant  updatedAt;
 
     private final List<WalletTransaction> transactions = new ArrayList<>();
 
     private Wallet(WalletId id, UserId userId, Money initialBalance) {
-        this.id = Objects.requireNonNull(id);
+        this.id               = Objects.requireNonNull(id);
         this.userId           = Objects.requireNonNull(userId);
         this.availableBalance = Objects.requireNonNull(initialBalance);
         this.reservedBalance  = Money.zero();
@@ -38,63 +38,51 @@ public class Wallet {
         this.updatedAt        = this.createdAt;
     }
 
+    // Factory method — gera um novo WalletId independente do UserId
     public static Wallet create(UserId userId, Money initialBalance) {
-        return new Wallet(
-                WalletId.of(userId.getValue()), // id = userId
-                userId,
-                initialBalance
-        );
+        return new Wallet(WalletId.generate(), userId, initialBalance);
     }
 
-    public static Wallet reconstitute(WalletId id, UserId userId, Money available,
-                                      Money reserved, Instant createdAt,
+    // Reconstitui a partir da persistência — preserva o id original
+    public static Wallet reconstitute(WalletId id,
+                                      UserId userId,
+                                      Money available,
+                                      Money reserved,
+                                      Instant createdAt,
                                       List<WalletTransaction> transactions) {
-        var wallet = new Wallet(id, userId, available);
+        Wallet wallet          = new Wallet(id, userId, available);
         wallet.reservedBalance = reserved;
         wallet.updatedAt       = Instant.now();
         wallet.transactions.addAll(transactions);
         return wallet;
-    };
+    }
 
-    /**
-     * Reserve funds for a Buy Order (Before Match)
-     * @param price - Price of Order (BRL)
-     * @param quantity - Quantity of Orders
-     */
     public void reserveForBuyOrder(Money price, Money quantity) {
-
-        var totalCost = price.multiply(quantity);
-
+        Money totalCost = price.multiply(quantity);
         if (!availableBalance.gte(totalCost)) {
             throw new InsufficientFundsException(
-                    "Insufficient funds to reserve %s. Available: %s".formatted(totalCost, availableBalance)
-            );
+                    "Insufficient funds to reserve %s. Available: %s"
+                            .formatted(totalCost, availableBalance));
         }
-
         availableBalance = availableBalance.substract(totalCost);
-        reservedBalance = reservedBalance.add(totalCost);
-
-        recordTransaction(WalletTransactionType.RESERVE, totalCost, "Buy Order reserve");
-
+        reservedBalance  = reservedBalance.add(totalCost);
+        recordTransaction(WalletTransactionType.RESERVE, totalCost,
+                "Reserve for buy order");
         this.updatedAt = Instant.now();
     }
 
     public void reserveForSellOrder(Money quantity) {
-
-        if(!availableBalance.gte(quantity)) {
+        if (!availableBalance.gte(quantity)) {
             throw new InsufficientFundsException(
-                    "Insufficent Vibranium to reserve %s. Available: %s".formatted(quantity, availableBalance)
-            );
+                    "Insufficient Vibranium to reserve %s. Available: %s"
+                            .formatted(quantity, availableBalance));
         }
-
         availableBalance = availableBalance.substract(quantity);
         reservedBalance  = reservedBalance.add(quantity);
-
         recordTransaction(WalletTransactionType.RESERVE, quantity,
-                "Buy Order reserve");
-
+                "Reserve for sell order");
         this.updatedAt = Instant.now();
-    };
+    }
 
     public void creditFromTrade(Money amount, String description) {
         availableBalance = availableBalance.add(amount);
@@ -112,7 +100,7 @@ public class Wallet {
         reservedBalance  = reservedBalance.substract(amount);
         availableBalance = availableBalance.add(amount);
         recordTransaction(WalletTransactionType.RELEASE, amount,
-                "Liberação de reserva — ordem cancelada");
+                "Reserve release — order cancelled");
         this.updatedAt = Instant.now();
     }
 

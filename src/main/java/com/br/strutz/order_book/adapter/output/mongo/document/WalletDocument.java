@@ -16,15 +16,15 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Document(collection = "wallets")
+@CompoundIndexes({
+        @CompoundIndex(name = "idx_wallet_user",
+                def = "{'user_id': 1}", unique = true)
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "wallets")
-@CompoundIndexes({
-        @CompoundIndex(name = "idx_user_id",
-                def = "{'userId': 1}", unique = true)
-})
 public class WalletDocument {
 
     @Id
@@ -52,17 +52,16 @@ public class WalletDocument {
     @Field("lock_touched_at")
     private Instant lockTouchedAt;
 
-    @Version
-    private Long version;
+    // @Version removido — concorrência gerenciada pelo Redisson (distributed lock)
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class WalletTransactionEmbedded {
-        private String type;
+        private String     type;
         private BigDecimal amount;
-        private String description;
+        private String     description;
 
         @Field("occurred_at")
         private Instant occurredAt;
