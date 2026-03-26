@@ -25,7 +25,7 @@ public class WalletMapper {
                 .toList();
 
         return WalletDocument.builder()
-                .id(wallet.getId().getValue())       // WalletId → String
+                .id(wallet.getId().getValue())       
                 .userId(wallet.getUserId().getValue())
                 .availableBalance(wallet.getAvailableBalance().getAmount())
                 .reservedBalance(wallet.getReservedBalance().getAmount())
@@ -44,7 +44,7 @@ public class WalletMapper {
                 .toList();
 
         return Wallet.reconstitute(
-                WalletId.of(doc.getId()),            // String → WalletId
+                WalletId.of(doc.getId()),            
                 UserId.of(doc.getUserId()),
                 Money.of(doc.getAvailableBalance()),
                 Money.of(doc.getReservedBalance()),

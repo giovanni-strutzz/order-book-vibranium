@@ -20,10 +20,10 @@ public class KafkaEventPublisher implements EventPublisher {
     private static final Logger log =
             LoggerFactory.getLogger(KafkaEventPublisher.class);
 
-    // Timeout para publishAndWait — evita bloqueio indefinido
+    
     private static final long PUBLISH_TIMEOUT_SECONDS = 5L;
 
-    // Mapeamento evento → tópico Kafka
+    
     private static final Map<Class<? extends Event>, String> TOPIC_MAP = Map.of(
             OrderPlacedEvent.class,    "orders.placed",
             OrderMatchedEvent.class,   "orders.matched",
@@ -43,7 +43,7 @@ public class KafkaEventPublisher implements EventPublisher {
     public void publish(Event event) {
         String topic = resolveTopic(event);
 
-        // correlationId como key — garante ordering por ordem no mesmo tópico
+        
         kafkaTemplate.send(topic, event.getCorrelationId(), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {

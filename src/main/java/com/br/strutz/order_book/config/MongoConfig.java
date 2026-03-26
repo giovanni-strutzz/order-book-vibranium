@@ -25,7 +25,7 @@ public class MongoConfig {
     @EventListener(ApplicationReadyEvent.class)
     public void createIndexes() {
 
-        // ── Orders ────────────────────────────────────────────
+        
         mongoTemplate.indexOps(OrderDocument.class)
                 .ensureIndex(new Index()
                         .on("correlation_id", Sort.Direction.ASC)
@@ -43,14 +43,14 @@ public class MongoConfig {
                         new Document("status", 1).append("type", 1).append("price", 1))
                         .named("idx_status_type_price"));
 
-        // ── Wallets ───────────────────────────────────────────
+        
         mongoTemplate.indexOps(WalletDocument.class)
                 .ensureIndex(new Index()
                         .on("user_id", Sort.Direction.ASC)
                         .unique()
                         .named("idx_wallet_user"));
 
-        // ── Trades ────────────────────────────────────────────
+        
         mongoTemplate.indexOps(TradeDocument.class)
                 .ensureIndex(new CompoundIndexDefinition(
                         new Document("buyer_id", 1).append("executed_at", -1))
@@ -66,7 +66,7 @@ public class MongoConfig {
                         .on("correlation_id", Sort.Direction.ASC)
                         .named("idx_trade_correlation"));
 
-        // ── Audit ─────────────────────────────────────────────
+        
         mongoTemplate.indexOps(AuditDocument.class)
                 .ensureIndex(new Index()
                         .on("correlation_id", Sort.Direction.ASC)

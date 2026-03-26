@@ -67,7 +67,7 @@ spring:
       orders-placed-dlt: orders.placed.DLT
       orders-matched-dlt: orders.matched.DLT
   mongodb:
-    uri: mongodb://admin:admin@localhost:27017/appdb?authSource=admin
+    uri: mongodb:
 
 resilience4j:
   circuitbreaker:

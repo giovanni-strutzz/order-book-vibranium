@@ -73,7 +73,7 @@ public class PlaceOrderCommandHandler implements PlaceOrderUseCase {
 
         List<Trade> trades = orderBook.match(order);
 
-//        orderRepository(order);
+
 
         if (!trades.isEmpty()) {
             walletService.settleTrades(trades);
@@ -83,10 +83,10 @@ public class PlaceOrderCommandHandler implements PlaceOrderUseCase {
             });
         }
 
-        // 7. Invalida cache do book — será reconstruído na próxima leitura
+        
         orderBookCache.invalidate();
 
-        // 8. Publica evento de ordem colocada
+        
         eventPublisher.publish(new OrderPlacedEvent(order));
 
         log.info("Order placed — orderId={} trades={}",
