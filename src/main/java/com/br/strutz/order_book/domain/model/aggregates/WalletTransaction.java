@@ -23,5 +23,14 @@ public class WalletTransaction {
 
     public static WalletTransaction of(WalletTransactionType transactionType, Money amount, String description) {
         return new WalletTransaction(transactionType, amount, description);
-    }
+    };
+
+    public static WalletTransaction reconstitute(
+            WalletTransactionType type,
+            Money amount,
+            String description,
+            Instant occurredAt)
+    {
+        return new WalletTransaction(type, amount, description);
+    };
 }
