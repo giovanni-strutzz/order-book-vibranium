@@ -52,7 +52,7 @@ public class WalletDocument {
     @Field("lock_touched_at")
     private Instant lockTouchedAt;
 
-    // @Version removido — concorrência gerenciada pelo Redisson (distributed lock)
+    
 
     @Data
     @NoArgsConstructor

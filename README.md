@@ -134,7 +134,7 @@ src/main/java/com/br/strutz/order_book/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/strutz/order-book-vibranium.git
+git clone https:
 cd order-book-vibranium
 ```
 
@@ -152,7 +152,7 @@ This starts the following services:
 | Redis | 6379 | — |
 | Zookeeper | 2181 | — |
 | Kafka | 9092 | — |
-| Kafka UI | 8080 | http://localhost:8080 |
+| Kafka UI | 8080 | http:
 
 ### 3. Seed the database
 
@@ -196,7 +196,7 @@ The application starts on port **8081** (port 8080 is reserved for Kafka UI).
 
 ### 5. Access the API docs
 
-Open [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
+Open [http:
 
 ---
 
@@ -210,7 +210,7 @@ Key properties:
 spring:
   data:
     mongodb:
-      uri: mongodb://admin:admin@localhost:27017/appdb?authSource=admin
+      uri: mongodb:
     redis:
       host: localhost
       port: 6379

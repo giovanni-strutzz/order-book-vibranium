@@ -13,7 +13,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -44,12 +43,12 @@ public class WalletService {
 
     public void reserveForBuyOrder(UserId userId, Money price, Money quantity) {
         executeWithLock(userId, wallet -> {
-            // Se não existe, lance exceção
+            
             if (wallet == null) {
                 throw new WalletNotFoundException(userId);
             }
             wallet.reserveForBuyOrder(price, quantity);
-            repository.save(wallet); // update
+            repository.save(wallet); 
         });
     }
 
@@ -84,9 +83,9 @@ public class WalletService {
                 .orElseThrow(() -> new WalletNotFoundException(userId));
     }
 
-    // -------------------------------------------------------------------------
-    // Private
-    // -------------------------------------------------------------------------
+    
+    
+    
 
     private void settleOneTrade(Trade trade) {
         settleForBuyer(trade);

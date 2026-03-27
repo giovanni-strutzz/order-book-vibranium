@@ -27,7 +27,7 @@ public class GetOrderHistoryQueryHandler implements GetOrderHistoryUseCase {
                 query.getSize()
         );
 
-        // Converte para snapshots
+        
         List<OrderSnapshot> snapshots = orders.stream()
                 .map(order -> OrderSnapshot.builder()
                         .orderId(order.getId().toString())
