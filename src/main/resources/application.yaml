@@ -1,6 +1,13 @@
 spring:
   application:
     name: vibranium-orderbook
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    url: jdbc:postgresql://localhost:5432/orderbook_rag
+    user: admin
+    password: admin
   data:
     mongodb:
       auto-index-creation: false
@@ -67,7 +74,23 @@ spring:
       orders-placed-dlt: orders.placed.DLT
       orders-matched-dlt: orders.matched.DLT
   mongodb:
-    uri: mongodb:
+    uri: mongodb://admin:admin@localhost:27017/appdb?authSource=admin
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orderbook_rag
+    username: admin
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  ai:
+    openai:
+      api-key:
+    embedding:
+      model: text-embedding-3-small
 
 resilience4j:
   circuitbreaker:
@@ -122,7 +145,7 @@ management:
       enabled: true
     redis:
       enabled: true
-    mongo:
+    mongodb:
       enabled: true
   metrics:
     tags:
