@@ -26,6 +26,7 @@ public class Wallet {
     private       Money    availableBalance;
     private       Money    reservedBalance;
     private       Instant  updatedAt;
+    private Long version;
 
     private final List<WalletTransaction> transactions = new ArrayList<>();
 
@@ -43,16 +44,18 @@ public class Wallet {
         return new Wallet(WalletId.generate(), userId, initialBalance);
     }
 
-    
+
     public static Wallet reconstitute(WalletId id,
                                       UserId userId,
                                       Money available,
                                       Money reserved,
                                       Instant createdAt,
-                                      List<WalletTransaction> transactions) {
+                                      List<WalletTransaction> transactions,
+                                      Long version) {         // ✅ adicionado
         Wallet wallet          = new Wallet(id, userId, available);
         wallet.reservedBalance = reserved;
         wallet.updatedAt       = Instant.now();
+        wallet.version = version;
         wallet.transactions.addAll(transactions);
         return wallet;
     }

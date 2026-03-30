@@ -27,6 +27,9 @@ import java.util.List;
 @Builder
 public class WalletDocument {
 
+    @Version
+    private Long version;
+
     @Id
     private String id;
 
@@ -52,7 +55,6 @@ public class WalletDocument {
     @Field("lock_touched_at")
     private Instant lockTouchedAt;
 
-    
 
     @Data
     @NoArgsConstructor

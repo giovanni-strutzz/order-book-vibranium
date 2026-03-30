@@ -77,6 +77,6 @@ public class CancelOrderCommandHandler implements CancelOrderUseCase {
 
         log.info("Order cancelled — orderId={}", order.getId());
 
-        return CancelOrderResult.success(order.getId());
+        return CancelOrderResult.success(order.getId(), order.getUserId());
     }
 }

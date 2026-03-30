@@ -15,6 +15,7 @@ public class OrderMapper {
     public OrderDocument toDocument(Order order) {
         return OrderDocument.builder()
                 .id(order.getId().getValue())
+                .version(order.getVersion())
                 .userId(order.getUserId().getValue())
                 .type(order.getType().name())
                 .status(order.getStatus().name())
@@ -26,7 +27,7 @@ public class OrderMapper {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();
-    };
+    }
 
     public Order toDomain(OrderDocument doc) {
         return Order.reconstitute(
@@ -39,7 +40,8 @@ public class OrderMapper {
                 OrderStatus.valueOf(doc.getStatus()),
                 doc.getCreatedAt(),
                 doc.getUpdatedAt(),
-                doc.getCorrelationId()
+                doc.getCorrelationId(),
+                doc.getVersion()
         );
     }
 }

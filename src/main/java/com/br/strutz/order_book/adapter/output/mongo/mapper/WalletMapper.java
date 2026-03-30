@@ -25,7 +25,8 @@ public class WalletMapper {
                 .toList();
 
         return WalletDocument.builder()
-                .id(wallet.getId().getValue())       
+                .id(wallet.getId().getValue())
+                .version(wallet.getVersion())
                 .userId(wallet.getUserId().getValue())
                 .availableBalance(wallet.getAvailableBalance().getAmount())
                 .reservedBalance(wallet.getReservedBalance().getAmount())
@@ -37,19 +38,21 @@ public class WalletMapper {
 
     public Wallet toDomain(WalletDocument doc) {
         List<WalletTransaction> transactions = doc.getTransactions().stream()
-                .map(tx -> WalletTransaction.of(
+                .map(tx -> WalletTransaction.reconstitute(
                         WalletTransactionType.valueOf(tx.getType()),
                         Money.of(tx.getAmount()),
-                        tx.getDescription()))
+                        tx.getDescription(),
+                        tx.getOccurredAt()))
                 .toList();
 
         return Wallet.reconstitute(
-                WalletId.of(doc.getId()),            
+                WalletId.of(doc.getId()),
                 UserId.of(doc.getUserId()),
                 Money.of(doc.getAvailableBalance()),
                 Money.of(doc.getReservedBalance()),
                 doc.getCreatedAt(),
-                transactions
+                transactions,
+                doc.getVersion()
         );
     }
 }

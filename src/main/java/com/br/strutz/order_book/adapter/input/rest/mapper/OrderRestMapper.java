@@ -59,6 +59,7 @@ public class OrderRestMapper {
                         ? result.getOrderId().getValue() : null)
                 .status(result.getStatus())
                 .message(result.getMessage())
+                .userId(result.getUserId().toString())
                 .build();
     }
 

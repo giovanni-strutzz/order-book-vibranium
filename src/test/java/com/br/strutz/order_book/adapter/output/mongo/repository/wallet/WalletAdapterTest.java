@@ -36,114 +36,43 @@ class WalletAdapterTest {
     @Mock
     private WalletMapper mapper;
 
-    @Mock
-    private MongoTemplate mongoTemplate;
-
     @InjectMocks
     private WalletAdapter walletAdapter;
 
-    private UserId      userId;
-    private Wallet      domainWallet;
+    private UserId userId;
+    private Wallet domainWallet;
     private WalletDocument walletDocument;
 
     @BeforeEach
     void setUp() {
-        userId        = mock(UserId.class);
-        domainWallet  = mock(Wallet.class);
+        userId = mock(UserId.class);
+        domainWallet = mock(Wallet.class);
         walletDocument = mock(WalletDocument.class);
 
         lenient().when(userId.getValue()).thenReturn("user-123");
     }
 
-    
     @Nested
     @DisplayName("save()")
     class Save {
 
         @Test
-        @DisplayName("deve inserir nova wallet quando não existe documento no banco")
-        void shouldInsertWhenWalletDoesNotExist() {
-            WalletDocument insertedDoc  = mock(WalletDocument.class);
-            Wallet         resultDomain = mock(Wallet.class);
+        @DisplayName("deve salvar wallet e retornar domínio")
+        void shouldSaveWallet() {
+            WalletDocument savedDoc = mock(WalletDocument.class);
+            Wallet resultDomain = mock(Wallet.class);
 
-            when(walletDocument.getUserId()).thenReturn("user-123");
             when(mapper.toDocument(domainWallet)).thenReturn(walletDocument);
-
-            
-            when(mongoTemplate.findOne(any(Query.class), eq(WalletDocument.class)))
-                    .thenReturn(null);
-            when(mongoTemplate.insert(walletDocument)).thenReturn(insertedDoc);
-            when(mapper.toDomain(insertedDoc)).thenReturn(resultDomain);
+            when(mongoRepository.save(walletDocument)).thenReturn(savedDoc);
+            when(mapper.toDomain(savedDoc)).thenReturn(resultDomain);
 
             Wallet result = walletAdapter.save(domainWallet);
 
             assertThat(result).isSameAs(resultDomain);
-            verify(mongoTemplate).insert(walletDocument);
-            verify(mongoTemplate, never()).findAndReplace(any(), any());
-        }
-
-        @Test
-        @DisplayName("deve substituir wallet existente via findAndReplace quando já existe")
-        void shouldReplaceWhenWalletAlreadyExists() {
-            WalletDocument existingDoc = buildExistingDoc("existing-id", "user-123");
-            WalletDocument newDoc      = buildNewDoc("user-123");
-            Wallet         resultDomain = mock(Wallet.class);
-
-            when(mapper.toDocument(domainWallet)).thenReturn(newDoc);
-
-            
-            when(mongoTemplate.findOne(any(Query.class), eq(WalletDocument.class)))
-                    .thenReturn(existingDoc);
-            when(mapper.toDomain(any(WalletDocument.class))).thenReturn(resultDomain);
-
-            Wallet result = walletAdapter.save(domainWallet);
-
-            assertThat(result).isSameAs(resultDomain);
-            verify(mongoTemplate).findAndReplace(any(Query.class), any(WalletDocument.class));
-            verify(mongoTemplate, never()).insert(any(WalletDocument.class));
-        }
-
-        @Test
-        @DisplayName("deve montar WalletDocument de substituição com id e createdAt do existente")
-        void shouldBuildReplacementDocumentWithExistingIdAndCreatedAt() {
-            Instant            originalCreatedAt = Instant.parse("2024-01-01T10:00:00Z");
-            Instant            newUpdatedAt      = Instant.parse("2024-06-01T12:00:00Z");
-
-            WalletDocument existingDoc = WalletDocument.builder()
-                    .id("existing-id")
-                    .userId("user-123")
-                    .createdAt(originalCreatedAt)
-                    .build();
-
-            WalletDocument newDoc = WalletDocument.builder()
-                    .userId("user-123")
-                    .availableBalance(BigDecimal.TEN)
-                    .reservedBalance(BigDecimal.ONE)
-                    .transactions(List.of())
-                    .updatedAt(newUpdatedAt)
-                    .build();
-
-            when(mapper.toDocument(domainWallet)).thenReturn(newDoc);
-            when(mongoTemplate.findOne(any(Query.class), eq(WalletDocument.class)))
-                    .thenReturn(existingDoc);
-
-            ArgumentCaptor<WalletDocument> replacedCaptor =
-                    ArgumentCaptor.forClass(WalletDocument.class);
-            when(mapper.toDomain(replacedCaptor.capture())).thenReturn(domainWallet);
-
-            walletAdapter.save(domainWallet);
-
-            WalletDocument replaced = replacedCaptor.getValue();
-            assertThat(replaced.getId()).isEqualTo("existing-id");
-            assertThat(replaced.getUserId()).isEqualTo("user-123");
-            assertThat(replaced.getCreatedAt()).isEqualTo(originalCreatedAt);
-            assertThat(replaced.getUpdatedAt()).isEqualTo(newUpdatedAt);
-            assertThat(replaced.getLockTouchedAt()).isEqualTo(newUpdatedAt);
-            assertThat(replaced.getAvailableBalance()).isEqualByComparingTo(BigDecimal.TEN);
+            verify(mongoRepository).save(walletDocument);
         }
     }
 
-    
     @Nested
     @DisplayName("findByUserId()")
     class FindByUserId {
@@ -151,8 +80,8 @@ class WalletAdapterTest {
         @Test
         @DisplayName("deve retornar Optional com domínio quando wallet existe")
         void shouldReturnWalletWhenFound() {
-            WalletDocument doc          = mock(WalletDocument.class);
-            Wallet         resultDomain = mock(Wallet.class);
+            WalletDocument doc = mock(WalletDocument.class);
+            Wallet resultDomain = mock(Wallet.class);
 
             when(mongoRepository.findByUserId("user-123")).thenReturn(Optional.of(doc));
             when(mapper.toDomain(doc)).thenReturn(resultDomain);
@@ -174,7 +103,6 @@ class WalletAdapterTest {
         }
     }
 
-    
     @Nested
     @DisplayName("existsByUserId()")
     class ExistsByUserId {
@@ -194,51 +122,5 @@ class WalletAdapterTest {
 
             assertThat(walletAdapter.existsByUserId(userId)).isFalse();
         }
-    }
-
-    
-    @Nested
-    @DisplayName("findDocumentByUserId() — comportamento interno via save()")
-    class FindDocumentByUserId {
-
-        @Test
-        @DisplayName("deve montar Query com campo user_id correto")
-        void shouldQueryByUserIdField() {
-            WalletDocument doc = mock(WalletDocument.class);
-            when(doc.getUserId()).thenReturn("user-123");
-            when(mapper.toDocument(domainWallet)).thenReturn(doc);
-
-            ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-
-            when(mongoTemplate.findOne(queryCaptor.capture(), eq(WalletDocument.class)))
-                    .thenReturn(null);
-            when(mongoTemplate.insert(doc)).thenReturn(doc);
-            when(mapper.toDomain(doc)).thenReturn(domainWallet);
-
-            walletAdapter.save(domainWallet);
-
-            Query query = queryCaptor.getValue();
-            
-            assertThat(query.getQueryObject().getString("user_id")).isEqualTo("user-123");
-        }
-    }
-
-    
-    private WalletDocument buildExistingDoc(String id, String userId) {
-        return WalletDocument.builder()
-                .id(id)
-                .userId(userId)
-                .createdAt(Instant.parse("2024-01-01T00:00:00Z"))
-                .build();
-    }
-
-    private WalletDocument buildNewDoc(String userId) {
-        return WalletDocument.builder()
-                .userId(userId)
-                .availableBalance(BigDecimal.valueOf(100))
-                .reservedBalance(BigDecimal.ZERO)
-                .transactions(List.of())
-                .updatedAt(Instant.now())
-                .build();
     }
 }

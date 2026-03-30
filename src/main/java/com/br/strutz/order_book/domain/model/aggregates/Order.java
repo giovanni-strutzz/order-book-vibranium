@@ -31,6 +31,8 @@ public class Order {
     private OrderStatus status;
     private Instant updatedAt;
 
+    private Long version;
+
     private Order(OrderId id, UserId userId, OrderType type,
                   Money price, Money quantity, String correlationId) {
         this.id             = Objects.requireNonNull(id);
@@ -63,13 +65,14 @@ public class Order {
                                      Money price, Money quantity,
                                      Money filledQuantity, OrderStatus status,
                                      Instant createdAt, Instant updatedAt,
-                                     String correlationId) {
+                                     String correlationId, Long version) {
         var order = new Order(id, userId, type, price, quantity, correlationId);
         order.filledQuantity = filledQuantity;
-        order.status         = status;
-        order.updatedAt      = updatedAt;
+        order.status = status;
+        order.updatedAt = updatedAt;
+        order.version = version;
         return order;
-    };
+    }
 
     public void fill(Money tradedQuantity) {
         assertActive();
